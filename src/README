@@ -1,0 +1,38 @@
+There are two sections in this folder
+
+1. The mininet setup section:
+Files include: run.sh  
+               minitopo.py
+               hwhw.py
+
+By setting parameters in run.sh, we can specify bottleneck bandwidth, queue length and other parameters.
+
+Running run.sh triggers minitopo.py which starts a simple mininet topology (two virtual switches and several hosts),
+and runs a dhcp server on a virtual dhcp host.
+
+hwhw.py is invoked by minitopo.py for setting up two real interfaces on the two virtual switches respectively 
+
+
+
+2. Stats collector section:
+Files inclde statscollector.py 
+	     agent.py
+	     tcshow.py
+
+statscollector.py file setups a RESTful API server, one can call it to get the stats by put the following addr in a URL:
+http://<the server ip>:<the server port>/stats/<src_ip>/<dst_ip>/<earliest_idx>/<num_entries>
+(Note: /stats/ is the function name and there is no need to modify it)
+
+For example:
+http://149.171.37.108:8080/stats/10.0.0.25/10.0.0.32/0/0
+
+as discussed,if earliest_idx and num_entries are both set to 0, then show all entries.
+
+
+agent.py is the main logic:
+         At northbound, it calculates the bw and delay for required entries
+         At southbound, it obtains required entries from tcshow
+	 It also runs a timer so that when it is idle it goes to sleep
+
+tcshow.py pulls stats by parsing regular expression of tc 
+
