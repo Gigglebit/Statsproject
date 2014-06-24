@@ -60,9 +60,11 @@ def tcshow (idx,path,delta_t):
     	         mark.append(item[1])
     #print col(2,entries)
     #print len(matches_dev)
+#    for i in entries:
+#	print i
     #print entries[2]
     del mark[:]
     return num_dev
 if __name__ == '__main__':
-	tcshow(0,['eth0','eth1'])
+	tcshow(0,['s1-eth2','eth1'],0.50)
 

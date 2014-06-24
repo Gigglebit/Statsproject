@@ -20,8 +20,8 @@ from subprocess import *
 from time import sleep, time
 from multiprocessing import Process
 from argparse import ArgumentParser
-from hwhw import *
-
+#from hwhw import *
+from nathw import *
 parser = ArgumentParser(description = "Pulling Stats Tests")
 
 parser.add_argument('--exp', '-e',
@@ -82,11 +82,14 @@ class SimpleTopo(Topo):
            host = self.addHost('h%s' % i)
            switch = self.addSwitch('s%s' % i)
            # 10 Mbps, 5ms delay, 1% loss, 1000 packet queue
-           self.addLink( host, switch, bw=int(args.hs_bw), max_queue_size=int(args.maxq), use_htb=True)
+           self.addLink( host, switch, bw=int(args.hs_bw))
+#, max_queue_size=int(args.maxq), use_htb=True)
            if lastSwitch:
-               self.addLink(switch, lastSwitch, bw=int(args.btn), max_queue_size=int(args.maxq), use_htb=True)
+               self.addLink(switch, lastSwitch, bw=int(args.btn))
+#, max_queue_size=int(args.maxq), use_htb=True)
            lastSwitch = switch
-       self.addLink(dhcp, lastSwitch, bw=int(args.hs_bw), max_queue_size=int(args.maxq), use_htb=True)
+       self.addLink(dhcp, lastSwitch, bw=int(args.hs_bw))
+#, max_queue_size=int(args.maxq), use_htb=True)
        
 topos = { 'mytopo': ( lambda: SimpleTopo() ) }
 
@@ -95,19 +98,21 @@ def Test():
    topo = SimpleTopo(k=2)
    net = Mininet(topo=topo,
                  host=CPULimitedHost, link=TCLink)
+#, controller=RemoteController)
    s1 = net.getNodeByName('s1')
    s2 = net.getNodeByName('s2')
    addRealIntf(net,args.intf1,s1)
    addRealIntf(net,args.intf2,s2)
-   net.start()
-   print "Dumping host connections"
+#   net.start()
+   rootnode=connectToInternet(net)
+#   print "Dumping host connections"
    dumpNodeConnections(net.hosts)
- 
-   net.pingAll()
+    
+#   net.pingAll()
    #h1 = net.getNodeByName('h1')
-   dhcp = net.getNodeByName('dhcp')
-   out = dhcp.cmd('sudo dhcpd')
-   print "DHCPD = "+ out
+#   dhcp = net.getNodeByName('dhcp')
+#   out = dhcp.cmd('sudo dhcpd')
+#   print "DHCPD = "+ out
    #h1.cmd("bash tc_cmd_diff.sh h1-eth0")
    #h1.cmd("tc -s show dev h1-eth0")
   # h2.cmd('iperf -s -w 16m -p 5001 -i 1 > iperf-recv.txt &')
@@ -125,6 +130,7 @@ def Test():
 
    os.system('killall -9 iperf' )
    net.hosts[0].cmd('killall -9 dhcpd')
+   stopNAT(rootnode)
    net.stop()
 
    Popen("killall -9 cat", shell=True).wait()
