@@ -97,25 +97,28 @@ def Test():
    "Create network and run simple performance test"
    topo = SimpleTopo(k=2)
    net = Mininet(topo=topo,
-                 host=CPULimitedHost, link=TCLink)
-#, controller=RemoteController)
+                 host=CPULimitedHost, link=TCLink, controller=RemoteController)
    s1 = net.getNodeByName('s1')
    s2 = net.getNodeByName('s2')
    addRealIntf(net,args.intf1,s1)
    addRealIntf(net,args.intf2,s2)
 #   net.start()
-   rootnode=connectToInternet(net)
+   opts = '-D -o UseDNS=no -u0'
+
+#' '.join( sys.argv[ 1: ] ) if len( sys.argv ) > 1 else (
+   rootnode=sshd(net, opts=opts)
 #   print "Dumping host connections"
    dumpNodeConnections(net.hosts)
     
 #   net.pingAll()
-   #h1 = net.getNodeByName('h1')
+   h2 = net.getNodeByName('h2')
 #   dhcp = net.getNodeByName('dhcp')
 #   out = dhcp.cmd('sudo dhcpd')
 #   print "DHCPD = "+ out
    #h1.cmd("bash tc_cmd_diff.sh h1-eth0")
    #h1.cmd("tc -s show dev h1-eth0")
-  # h2.cmd('iperf -s -w 16m -p 5001 -i 1 > iperf-recv.txt &')
+   h2.cmd('iperf -s -p 5001 -i 1 > iperf-recv_TCP.txt &')
+   h2.cmd('iperf -s -p 5003 -u -i 1 > iperf-recv_UDP.txt &')
    #h2.cmd('iperf -s -p %s -i 1 > iperf_server_TCP.txt &' % 5001)
 #               (CUSTOM_IPERF_PATH, 5001, args.dir))
    #monitoring the network
@@ -127,7 +130,8 @@ def Test():
    #start mininet CLI
    CLI(net)
    #terminate
-
+   for host in net.hosts:
+       host.cmd('kill %'+ '/usr/sbin/sshd')
    os.system('killall -9 iperf' )
    net.hosts[0].cmd('killall -9 dhcpd')
    stopNAT(rootnode)

@@ -131,8 +131,8 @@ def sshd( network, cmd='/usr/sbin/sshd', opts='-D',
         switch = network[ 's1' ]  # switch to use
     if not routes:
         routes = [ '10.0.0.0/24' ]
-    #connectToRootNS( network, switch, ip, routes )
-    rootnode = connectToInternet( network )
+#    connectToRootNS( network, switch, ip, routes )
+    connectToInternet
     for host in network.hosts:
         host.cmd( cmd + ' ' + opts + '&' )
     print
@@ -142,11 +142,10 @@ def sshd( network, cmd='/usr/sbin/sshd', opts='-D',
         print host.name, host.IP()
     print
     print "*** Type 'exit' or control-D to shut down network"
-#    CLI( network )
-#    for host in network.hosts:
-#        host.cmd( 'kill %' + cmd )
-#    network.stop()
-    return rootnode
+    CLI( network )
+    for host in network.hosts:
+        host.cmd( 'kill %' + cmd )
+    network.stop()
 
 def addRealIntf(net, intf, switch):
 

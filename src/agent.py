@@ -61,17 +61,33 @@ def cal_bw_delay(entries_range,entries_start,idx,delta_t,num_dev):
 		delay_sum = 0
 		for j in xrange(num_dev):
 			delta_sentB = int(col(3,entries[(entries_start-i)*num_dev+j]))-int(col(3,entries[(entries_start-i-1)*num_dev+j]))
-			bw = float(delta_sentB)/float(delta_t[(entries_start-i)])
-			b.append((float(max_bw[j])-bw))
-			if bw != 0: #data in transmission, let me know the average delay in a time interval 
-				delay = (int(col(8,entries[(entries_start-i)*num_dev+j]))+int(col(8,entries[(entries_start-i-1)*num_dev+j])))/(2*bw)
+			delta_sentP = int(col(4,entries[(entries_start-i)*num_dev+j]))-int(col(4,entries[(entries_start-i-1)*num_dev+j]))
+			bw = float(delta_sentB)/float(delta_t[(entries_start-i)*num_dev]) #Bytes/sec
+			bwp = float(delta_sentP)/float(delta_t[(entries_start-i)*num_dev]) #Pkts/sec
+#			print j
+#			print bw
+#			print max_bw[j]
+			#print bwp
+			tempbw = float(max_bw[1-j])-bw
+			if tempbw > 0:
+				b.append(tempbw)
 			else:
-				delay = 0
+				b.append(0.0)
+			if bwp != 0: #data in transmission, let me know the average delay in a time interval 
+				#delay = (int(col(8,entries[(entries_start-i)*num_dev+j]))+int(col(8,entries[(entries_start-i-1)*num_dev+j])))/(2*bw)
+				delay = (int(col(9,entries[(entries_start-i)*num_dev+j]))+int(col(9,entries[(entries_start-i-1)*num_dev+j])))/(2*bwp)
+				#print int(col(9,entries[(entries_start-i)*num_dev+j]))
+				
+			else:
+				delay = 0.0
+			#print delay
 			delay_sum+=delay
+			#print delay_sum
+		#print "loop out"
 		l.append(idx-i)
-		l.append(delta_t[(entries_start-i)])
+		l.append(delta_t[(entries_start-i)*num_dev])
 		#print min(b)
-		#print b
+#		print delay_sum
 		l.append(min(b))#give me available bandwidth
 		l.append(delay_sum)
 		jpip_stats.append(l)
@@ -147,11 +163,11 @@ class monitor_stats(threading.Thread):
 						del entries[0:num_dev] #keep window size to be 100
 					idx+=1
 					prev_t = t
-				if num_dev!=0:
-					if called:
-						q.put(idx-1)
-						q.put(entries)
-						called = False
+					if num_dev!=0:
+						if called:
+							q.put(idx-1)
+							q.put(entries)
+							called = False
 		except KeyboardInterrupt:
 				print "stoptimer"
 				self.stop()
@@ -166,7 +182,7 @@ def return_stats(path,earliest_idx,num_entries):
 	idx = q.get()
 	returned_entries=q.get()
 	delta_t = col(10,returned_entries)
-	#print returned_entries
+#	print returned_entries
 	resolve_idx(path,idx,earliest_idx,num_entries,delta_t,num_dev)
 	return jpip_stats
 
