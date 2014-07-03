@@ -95,7 +95,7 @@ def cal_bw_delay(entries_range,entries_start,idx,delta_t,num_dev):
 			if bwp != 0: #data in transmission, let me know the instantaneous delay in a time interval 
 				#delay = (int(col(8,entries[(entries_start-i)*num_dev+j]))+int(col(8,entries[(entries_start-i-1)*num_dev+j])))/(2*bw)
 				#delay = (int(col(9,entries[(entries_start-i)*num_dev+j]))+int(col(9,entries[(entries_start-i-1)*num_dev+j])))/(2*bwp)
-				delay = int(col(9,entries[(entries_start-i)*num_dev+j]))*(int(col(3,entries[(entries_start-i)*num_dev+j]))/int(col(4,entries[(entries_start-i)*num_dev+j])))/int(max_bw[j])
+				delay = int(col(9,entries[(entries_start-i)*num_dev+j]))*(int(col(3,entries[(entries_start-i)*num_dev+j]))/int(col(2,entries[(entries_start-i)*num_dev+j])))/int(max_bw[j])
 				#print int(col(9,entries[(entries_start-i)*num_dev+j]))
 				
 			else:

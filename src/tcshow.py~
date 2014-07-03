@@ -4,7 +4,6 @@ import time
 import subprocess
 ############################
 # This is a simple function for extracting useful info from tc -s qdisc show
-# entries[]:
 # Extracted columns include:
 # 0   1       2       3           4             5                6                 7        8              9
 # idx RootNo. DevName Sent(Bytes) Sent(Packets) Dropped(Packets) Overlimits(Bytes) Requeues Backlog(Bytes) Backlog(Packets) 
