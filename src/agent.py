@@ -12,7 +12,7 @@ from tcshow import *
 
 #shared Queue for multithreads
 q=Queue(maxsize=3)
-back_q= Queue(maxsize=1)
+#back_q= Queue(maxsize=1)
 
 #output
 '''
@@ -37,8 +37,8 @@ called = False
 threads=[]
 
 #link capacity 
-max_bw = [640000,12500000]#
-
+#max_bw = [640000,12500000]#5Mbps/100Mbps
+max_bw = [640000,1280000]
 #sampling timer, sampling at every 50ms
 class Timer(threading.Thread):
 	"""
@@ -86,20 +86,27 @@ def cal_bw_delay(entries_range,entries_start,idx,delta_t,num_dev):
 			delta_sentB = int(col(3,entries[(entries_start-i)*num_dev+j]))-int(col(3,entries[(entries_start-i-1)*num_dev+j]))
 			delta_sentP = int(col(4,entries[(entries_start-i)*num_dev+j]))-int(col(4,entries[(entries_start-i-1)*num_dev+j]))
 			bw = float(delta_sentB)/float(delta_t[(entries_start-i)*num_dev]) #Bytes/sec
-			bwp = float(delta_sentP)/float(delta_t[(entries_start-i)*num_dev]) #Pkts/sec
-			tempbw = float(max_bw[1-j])-bw
-			if tempbw > 0:
-				b.append(tempbw)
+			#bwp = float(delta_sentP)/float(delta_t[(entries_start-i)*num_dev]) #Pkts/sec
+			#print j 
+			#print max_bw
+			avail_bw = float(max_bw[j])-bw
+			if avail_bw > 0:
+				b.append(avail_bw)
 			else:
 				b.append(0.0)
-			if bwp != 0: #data in transmission, let me know the instantaneous delay in a time interval 
+			#if bwp != 0: #data in transmission, let me know the instantaneous delay in a time interval 
 				#delay = (int(col(8,entries[(entries_start-i)*num_dev+j]))+int(col(8,entries[(entries_start-i-1)*num_dev+j])))/(2*bw)
 				#delay = (int(col(9,entries[(entries_start-i)*num_dev+j]))+int(col(9,entries[(entries_start-i-1)*num_dev+j])))/(2*bwp)
-				delay = int(col(9,entries[(entries_start-i)*num_dev+j]))*(int(col(3,entries[(entries_start-i)*num_dev+j]))/int(col(4,entries[(entries_start-i)*num_dev+j])))/int(max_bw[j])
+			pkt=int(col(4,entries[(entries_start-i)*num_dev+j]))				
+			if pkt!=0:
+				Psize = float(col(3,entries[(entries_start-i)*num_dev+j]))/pkt
+			else:
+				Psize = 1000
+			delay = float(col(9,entries[(entries_start-i)*num_dev+j]))*Psize/float(max_bw[j])
 				#print int(col(9,entries[(entries_start-i)*num_dev+j]))
 				
-			else:
-				delay = 0.0
+			#else:
+				#delay = 0.0
 			delay_sum+=delay
 		l.append(idx-i)
 		l.append(delta_t[(entries_start-i)*num_dev])
@@ -221,6 +228,7 @@ class monitor_stats(threading.Thread):
 				if get_Stat: #if the flag is triggered,run the following code 
 					t= time.time()
 					delta_t = float(t) - float(prev_t)#get time difference
+					prev_t = t
 					if delta_t < 0:
 					 	delta_t =  self.runTime
 					num_dev=tcshow(idx,self.path,delta_t) # tell me the stats along the path 
@@ -228,12 +236,12 @@ class monitor_stats(threading.Thread):
 					if idx >= MAX_BUF: #ensure max 100 entries
 						del entries[0:num_dev] #keep window size to be 100
 					idx+=1  #keep track of index
-					prev_t = t
-					if num_dev!=0:
-						if called: #if a http request is called, send the current idx and entries[] to q.
-							q.put(idx-1)
-							q.put(entries)
-							called = False
+					
+				if num_dev!=0:
+					if called: #if a http request is called, send the current idx and entries[] to q.
+						q.put(idx-1)
+						q.put(entries)
+						called = False
 		except KeyboardInterrupt:
 				print "stoptimer"
 				self.stop()

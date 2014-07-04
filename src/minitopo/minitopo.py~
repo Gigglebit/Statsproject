@@ -95,7 +95,9 @@ def Test():
    "Create network and run simple performance test"
    topo = SimpleTopo(k=2)
    net = Mininet(topo=topo,
-                 host=CPULimitedHost, link=TCLink, controller=RemoteController)
+                 host=CPULimitedHost, link=TCLink)
+#controller = OVSController) 
+#controller=RemoteController)
    s1 = net.getNodeByName('s1')
    s2 = net.getNodeByName('s2')
    if args.intf1 is not None:
