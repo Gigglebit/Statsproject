@@ -32,5 +32,5 @@ def find_path(a_ip,b_ip):
 # STATICALY DEFINE LINKS IN HERE.
 
 
-run(server='paste',host='10.0.2.15', port=8080, debug=True)
+run(server='paste',host='10.0.0.254', port=8080, debug=True)
 #run(host='10.0.2.15', port=8080, debug=True)

@@ -38,7 +38,7 @@ threads=[]
 
 #link capacity 
 #max_bw = [640000,12500000]#5Mbps/100Mbps
-max_bw = [640000,1280000]
+max_bw = [1280000,640000]
 #sampling timer, sampling at every 50ms
 class Timer(threading.Thread):
 	"""

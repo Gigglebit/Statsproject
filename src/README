@@ -37,3 +37,37 @@ agent.py is the main logic:
 
 tcshow.py pulls stats by parsing regular expression of tc 
 
+###################################
+#INSTRUCTIONS                     #
+###################################
+I.Start mininet topology:
+	To run it successfully, make sure mininet,OVS and pox are installed
+	Also make sure sshd and dhcpd are available to use
+	1.edit run.sh specify bottleneck speed in Mbps, Real Interfaces, and general bandwidth capacity hs_bw
+	2.flush ip addresses e.g.ip addr flush eth0
+	3.simply type sudo ./run.sh
+	This will create the following topology:
+                |-----------------------------|
+                |   h1                  h2    |
+                |   |                    |    |
+                |   |                    |    |
+        eth0----|---s1------------------s2----|------eth1
+                |   |                         |
+                |   dhcp                      |
+                |_________________Linux Server|
+
+Note:
+	i)Any external connected devices with DHCP enabled, would be automatically assign an IP 10.0.0.X/24
+	ii)You can also ssh to any virtual hosts h1,h2 or dhcp on the Linux Server
+        iii)The Linux Server has a namespace 10.0.0.254 and this is the address for stats collector http request as well
+
+II.Run stats collector
+	Preparation:
+	Make sure python bottle module, paste module are installed
+	1.type net in mininet to see how interfaces are connected, 
+          edit retVal = ["s1-eth2","s2"] for the path in find_path(a_ip,b_ip) 
+	  also change the a_ip and b_ip conditions in that function based on your assigned ip
+	2.if you did not use the default link speed settings, please change the max_bw[] list in agent.py file with reverse ordered link speed settings
+	3.now you are good to run by simple type: sudo python statscollector.py
+
+If there is any error pls report back to me: yu.wang1@unsw.edu.au 
